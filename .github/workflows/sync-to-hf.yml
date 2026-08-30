@@ -20,3 +20,12 @@ jobs:
         run: |
           git remote add hf https://${{ secrets.HF_USERNAME }}:$HF_TOKEN@huggingface.co/spaces/${{ secrets.HF_USERNAME }}/${{ secrets.HF_SPACE }}
           git push --force hf main
+      - name: Notify Discord
+        if: always()
+        env:
+          DISCORD_WEBHOOK: ${{ secrets.DISCORD_WEBHOOK }}
+        run: |
+          STATUS="${{ job.status }}"
+          curl -H "Content-Type: application/json" -X POST \
+            -d "{\"content\": \"GitHub Action **$STATUS** for commit \`${{ github.sha }}\` by ${{ github.actor }}\"}" \
+            "$DISCORD_WEBHOOK"
