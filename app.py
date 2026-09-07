@@ -12,7 +12,7 @@ clipi_client = Client("fffiloni/CLIP-Interrogator-2")
 
 from transformers import AutoTokenizer, AutoModelForCausalLM
 
-model_path = "meta-llama/Llama-2-7b-chat-hf"
+model_path = "openai/gpt-oss-20b"
 
 tokenizer = AutoTokenizer.from_pretrained(model_path, use_fast=False, token=hf_token)
 model = AutoModelForCausalLM.from_pretrained(model_path, token=hf_token).half().cuda()
