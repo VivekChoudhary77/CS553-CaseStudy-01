@@ -1,4 +1,4 @@
-# Copied product from https://huggingface.co/spaces/fffiloni/Image-to-Story/blob/main/app.py
+# Original product reference: https://huggingface.co/spaces/fffiloni/Image-to-Story/blob/main/app.py
 
 import spaces
 import gradio as gr
@@ -131,13 +131,6 @@ with gr.Blocks(css=css) as demo:
             with gr.Column():
                 #caption = gr.Textbox(label="Generated Caption")
                 story = gr.Textbox(label="generated Story", elem_id="story")
-        
-        gr.Examples(examples=[["./examples/crabby.png", "Children"],["./examples/hopper.jpeg", "Adult"]],
-                    fn=infer,
-                    inputs=[image_in, audience],
-                    outputs=[story],
-                    cache_examples=False
-                   )
         
     submit_btn.click(fn=infer, inputs=[image_in, audience], outputs=[story])
 
