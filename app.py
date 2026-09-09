@@ -19,18 +19,18 @@ model = AutoModelForCausalLM.from_pretrained(model_path, token=hf_token).half().
 
 @spaces.GPU
 def quen_gen_safety_advice(prompt):
-    """Generate a list of safety instructions using the qwen model based on a prompt.
+    """Generate a list of safety advice using the qwen model based on a prompt.
     
     Args:
         prompt: A string prompt containing an image description and safety_advice generation instructions.
         
     Returns:
-        A generated list of safety instructions string with special formatting and tokens removed.
+        A generated list of safety advice string with special formatting and tokens removed.
     """
 
-    instruction = """[INST] <<SYS>>\nYou are a professional safety analyst. You will be given an image caption and must provide a bulleted list of core safety instructions to consider. 
-            For that given you'll be asked to generate a list of safety instructions that you think could fit very well with the image provided.
-            Always answer with a list of safety instructions, while being safe as possible.  Your answers should not include any harmful, unethical, racist, sexist, toxic, dangerous, or illegal content. Please ensure that your responses are socially unbiased and positive in nature.
+    instruction = """[INST] <<SYS>>\nYou are a professional safety analyst. You will be given an image caption and must provide a numbered list of core safety advice to consider.
+            In your response, please limit safety advice to the top 10 most important, labeling each as 1-10, 1 being the most important. Provide a title before the list of safety advice.
+            Always answer with a list of safety advice, while being safe as possible.  Your answers should not include any harmful, unethical, racist, sexist, toxic, dangerous, or illegal content. Please ensure that your responses are socially unbiased and positive in nature.
             If a question does not make any sense, or is not factually coherent, explain why instead of answering something not correct. If you don't know the answer to a question, please don't share false information.\n<</SYS>>\n\n{} [/INST]"""
 
     
@@ -58,14 +58,14 @@ def get_text_after_colon(input_text):
         return input_text
 
 def infer(image_input, running_platform):
-    """Generate a bulleted list of safety advice based on an image using CLIP Interrogator and an LLM.
+    """Generate a numb ered list of safety advice based on an image using CLIP Interrogator and an LLM.
     
     Args:
         image_input: A file path to the input image to analyze.
         running_platform: A string indicating the target running platform for the LLM to run on (local or remote).
     
     Returns:
-        A formatted, list of safety instructions based on the provided image.
+        A formatted, list of safety advice based on the provided image.
 
     """
     gr.Info('Calling CLIP Interrogator ...')
@@ -80,7 +80,7 @@ def infer(image_input, running_platform):
 
     if running_platform == "Local (Qwen2.5-3B-Instruct)":
         qwen = f"""
-        I'll give you a simple image caption, please provide a bulleted list of safety instructions that would fit well with the image.
+        I'll give you a simple image caption, please provide a bulleted list of safety advice that would fit well with the image.
         Here's the image description: 
         '{clipi_result}'
         
