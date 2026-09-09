@@ -12,27 +12,25 @@ clipi_client = Client("fffiloni/CLIP-Interrogator-2")
 
 from transformers import AutoTokenizer, AutoModelForCausalLM
 
-model_path = "openai/gpt-oss-20b"
+model_path = "Qwen/Qwen3-8B"
 
 tokenizer = AutoTokenizer.from_pretrained(model_path, use_fast=False, token=hf_token)
 model = AutoModelForCausalLM.from_pretrained(model_path, token=hf_token).half().cuda()
 
-#client = Client("https://fffiloni-test-llama-api-debug.hf.space/", hf_token=hf_token)
-
 @spaces.GPU
-def llama_gen_story(prompt):
-    """Generate a fictional story using the LLaMA 2 model based on a prompt.
+def quen_gen_safety_advice(prompt):
+    """Generate a list of safety instructions using the qwen model based on a prompt.
     
     Args:
-        prompt: A string prompt containing an image description and story generation instructions.
+        prompt: A string prompt containing an image description and safety_advice generation instructions.
         
     Returns:
-        A generated fictional story string with special formatting and tokens removed.
+        A generated list of safety instructions string with special formatting and tokens removed.
     """
 
-    instruction = """[INST] <<SYS>>\nYou are a storyteller. You'll be given an image description and some keyword about the image. 
-            For that given you'll be asked to generate a story that you think could fit very well with the image provided.
-            Always answer with a cool story, while being safe as possible.  Your answers should not include any harmful, unethical, racist, sexist, toxic, dangerous, or illegal content. Please ensure that your responses are socially unbiased and positive in nature.
+    instruction = """[INST] <<SYS>>\nYou are a professional safety analyst. You will be given an image caption and must provide a bulleted list of core safety instructions to consider. 
+            For that given you'll be asked to generate a list of safety instructions that you think could fit very well with the image provided.
+            Always answer with a list of safety instructions, while being safe as possible.  Your answers should not include any harmful, unethical, racist, sexist, toxic, dangerous, or illegal content. Please ensure that your responses are socially unbiased and positive in nature.
             If a question does not make any sense, or is not factually coherent, explain why instead of answering something not correct. If you don't know the answer to a question, please don't share false information.\n<</SYS>>\n\n{} [/INST]"""
 
     
@@ -59,20 +57,16 @@ def get_text_after_colon(input_text):
         # Return the original text if ":" is not found
         return input_text
 
-def infer(image_input, audience):
-    """Generate a fictional story based on an image using CLIP Interrogator and LLaMA2.
+def infer(image_input, running_platform):
+    """Generate a bulleted list of safety advice based on an image using CLIP Interrogator and an LLM.
     
     Args:
         image_input: A file path to the input image to analyze.
-        audience: A string indicating the target audience, such as 'Children' or 'Adult'.
+        running_platform: A string indicating the target running platform for the LLM to run on (local or remote).
     
     Returns:
-        A formatted, multi-paragraph fictional story string related to the image content.
-        
-    Steps:
-        1. Use the CLIP Interrogator model to generate a semantic caption from the image.
-        2. Format a prompt asking the LLaMA2 model to write a story based on the caption.
-        3. Clean and format the story output for readability.
+        A formatted, list of safety instructions based on the provided image.
+
     """
     gr.Info('Calling CLIP Interrogator ...')
 
@@ -85,16 +79,16 @@ def infer(image_input, audience):
     print(clipi_result)
    
 
-    llama_q = f"""
-    I'll give you a simple image caption, please provide a fictional story for a {audience} audience that would fit well with the image. Please be creative, do not worry and only generate a cool fictional story. 
+    qwen = f"""
+    I'll give you a simple image caption, please provide a bulleted list of safety instructions that would fit well with the image.
     Here's the image description: 
     '{clipi_result}'
     
     """
-    gr.Info('Calling Llama2 ...')
-    result = llama_gen_story(llama_q)
+    gr.Info('Calling Qwen3 ...')
+    result = quen_gen_safety_advice(qwen)
 
-    print(f"Llama2 result: {result}")
+    print(f"Qwen3 result: {result}")
 
     result = get_text_after_colon(result)
 
@@ -109,7 +103,7 @@ def infer(image_input, audience):
 
 css="""
 #col-container {max-width: 910px; margin-left: auto; margin-right: auto;}
-div#story textarea {
+div#safety_advice textarea {
     font-size: 1.5em;
     line-height: 1.4em;
 }
@@ -119,19 +113,19 @@ with gr.Blocks(css=css) as demo:
     with gr.Column(elem_id="col-container"):
         gr.Markdown(
             """
-            <h1 style="text-align: center">Image to Story</h1>
-            <p style="text-align: center">Upload an image, get a story made by Llama2 !</p>
+            <h1 style="text-align: center">Image to Safety Advice</h1>
+            <p style="text-align: center">Upload an image, get safety advice based on the image content!</p>
             """
         )
         with gr.Row():
             with gr.Column():
-                image_in = gr.Image(label="Image input", type="filepath", elem_id="image-in")
-                audience = gr.Radio(label="Target Audience", choices=["Children", "Adult"], value="Children")
-                submit_btn = gr.Button('Tell me a story')
+                image_in = gr.Image(label="Image Input", type="filepath", elem_id="image-in")
+                running_platform = gr.Radio(label="LLM Model", choices=["Local (model name here)", "Remote (model name here)"], value="Children")
+                submit_btn = gr.Button('Give me safety advice')
             with gr.Column():
                 #caption = gr.Textbox(label="Generated Caption")
-                story = gr.Textbox(label="generated Story", elem_id="story")
+                safety_advice = gr.Textbox(label="Generated Safety Advice", elem_id="safety_advice")
         
-    submit_btn.click(fn=infer, inputs=[image_in, audience], outputs=[story])
+    submit_btn.click(fn=infer, inputs=[image_in, running_platform], outputs=[safety_advice])
 
 demo.queue(max_size=12).launch(ssr_mode=False, mcp_server=True)
