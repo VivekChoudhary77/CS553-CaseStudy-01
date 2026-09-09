@@ -12,7 +12,7 @@ clipi_client = Client("fffiloni/CLIP-Interrogator-2")
 
 from transformers import AutoTokenizer, AutoModelForCausalLM
 
-model_path = "Qwen/Qwen3-8B"
+model_path = "Qwen/Qwen2.5-3B-Instruct"  # Qwen/Qwen3-8B was too large
 
 tokenizer = AutoTokenizer.from_pretrained(model_path, use_fast=False, token=hf_token)
 model = AutoModelForCausalLM.from_pretrained(model_path, token=hf_token).half().cuda()
@@ -77,20 +77,24 @@ def infer(image_input, running_platform):
 		api_name="/clipi2"
     )
     print(clipi_result)
-   
 
-    qwen = f"""
-    I'll give you a simple image caption, please provide a bulleted list of safety instructions that would fit well with the image.
-    Here's the image description: 
-    '{clipi_result}'
-    
-    """
-    gr.Info('Calling Qwen3 ...')
-    result = quen_gen_safety_advice(qwen)
+    if running_platform == "Local (Qwen2.5-3B-Instruct)":
+        qwen = f"""
+        I'll give you a simple image caption, please provide a bulleted list of safety instructions that would fit well with the image.
+        Here's the image description: 
+        '{clipi_result}'
+        
+        """
+        gr.Info('Calling Qwen3 ...')
+        result = quen_gen_safety_advice(qwen)
 
-    print(f"Qwen3 result: {result}")
+        print(f"Qwen3 result: {result}")
 
-    result = get_text_after_colon(result)
+        result = get_text_after_colon(result)
+    else:
+        # Put remote model inference code here
+        result = "No remote model configured"
+        print(f"No remote model configured")
 
     # Split the text into paragraphs based on actual line breaks
     paragraphs = result.split('\n')
@@ -120,7 +124,7 @@ with gr.Blocks(css=css) as demo:
         with gr.Row():
             with gr.Column():
                 image_in = gr.Image(label="Image Input", type="filepath", elem_id="image-in")
-                running_platform = gr.Radio(label="LLM Model", choices=["Local (model name here)", "Remote (model name here)"], value="Children")
+                running_platform = gr.Radio(label="LLM Model", choices=["Local (Qwen2.5-3B-Instruct)", "Remote (model name here)"], value="Children")
                 submit_btn = gr.Button('Give me safety advice')
             with gr.Column():
                 #caption = gr.Textbox(label="Generated Caption")
