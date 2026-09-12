@@ -22,7 +22,7 @@ model = AutoModelForCausalLM.from_pretrained(model_path, token=hf_token).half().
 
 @spaces.GPU
 def gen_safety_advice(prompt, platform):
-    """Generate a 2-4 sentence segment of safety advice using the qwen model based on a prompt.
+    """Generate a 2-4 sentence segment of safety advice using the qwen local model or openai remote inference model based on a prompt.
     
     Args:
         prompt: A string prompt containing an image description and safety_advice generation instructions.
@@ -31,7 +31,7 @@ def gen_safety_advice(prompt, platform):
         A generated 2-4 sentence segment of safety advice string with special formatting and tokens removed.
     """
 
-    instruction = """[INST] <<SYS>>\nYou are a professional safety analyst. You will be given an image caption and must provide a numbered list of core safety advice to consider.
+    instruction = """[INST] <<SYS>>\nYou are a professional safety analyst. Provide the most important safety advice based on the image description provided.
             In your response, please limit safety advice to 2-4 sentences of the most crucial safety advice to consider. Provide a concise title before the safety advice.
             Always answer with the top safety advice, while being safe as possible.  Your answers should not include any harmful, unethical, racist, sexist, toxic, dangerous, or illegal content. Please ensure that your responses are socially unbiased and positive in nature.
             If a question does not make any sense, or is not factually coherent, explain why instead of answering something not correct. If you don't know the answer to a question, please don't share false information.\n<</SYS>>\n\n{} [/INST]"""
@@ -47,9 +47,9 @@ def gen_safety_advice(prompt, platform):
         gr.Info('Calling OpenAI/gpt-oss-20b (remote)...')
         try:
             inf_client = InferenceClient(token=hf_token)
-            output_text = inf_client.text_generation(model=remote_model_path, inputs=prompt, max_new_tokens=4096)
+            output_text = inf_client.text_generation(model=remote_model_path, prompt=prompt, max_new_tokens=4096)
         except Exception as e:
-            gr.Info(f"Error: {e}")
+            gr.Info(f"Error!!: {e}")
     #print(generate_ids)
     #print(output_text)
     pattern = r'\[INST\].*?\[/INST\]'
