@@ -130,7 +130,7 @@ with gr.Blocks(css=css) as demo:
         with gr.Row():
             with gr.Column():
                 image_in = gr.Image(label="Image Input", type="filepath", elem_id="image-in")
-                running_platform = gr.Radio(label="LLM Model", choices=["Local (Qwen2.5-3B-Instruct)", "Remote (openai/gpt-oss-20b)"], value="Children")
+                running_platform = gr.Radio(label="LLM Model", choices=["Local (Qwen/Qwen2.5-3B-Instruct)", "Remote (OpenAI/gpt-oss-20b)"], value="Children")
                 submit_btn = gr.Button('Give me safety advice')
             with gr.Column():
                 #caption = gr.Textbox(label="Generated Caption")
