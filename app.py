@@ -21,7 +21,7 @@ tokenizer = AutoTokenizer.from_pretrained(model_path, use_fast=False, token=hf_t
 model = AutoModelForCausalLM.from_pretrained(model_path, token=hf_token).half().cuda()
 
 @spaces.GPU
-def quen_gen_safety_advice(prompt):
+def gen_safety_advice(prompt, platform):
     """Generate a 2-4 sentence segment of safety advice using the qwen model based on a prompt.
     
     Args:
@@ -38,13 +38,20 @@ def quen_gen_safety_advice(prompt):
 
     
     prompt = instruction.format(prompt)
-    
-    generate_ids = model.generate(tokenizer(prompt, return_tensors='pt').input_ids.cuda(), max_new_tokens=4096)
-    output_text = tokenizer.decode(generate_ids[0], skip_special_tokens=True)
+
+    if platform == "Local (Qwen/Qwen2.5-3B-Instruct)":
+        print("Local model selected!!")
+        generate_ids = model.generate(tokenizer(prompt, return_tensors='pt').input_ids.cuda(), max_new_tokens=4096)
+        output_text = tokenizer.decode(generate_ids[0], skip_special_tokens=True)
+    else:
+        print("Remote model selected!!")
+        inf_client = InferenceClient(token=hf_token)
+        output_text = inf_client.text_generation(model=remote_model_path, inputs=prompt, max_new_tokens=4096)
     #print(generate_ids)
     #print(output_text)
     pattern = r'\[INST\].*?\[/INST\]'
     cleaned_text = re.sub(pattern, '', output_text, flags=re.DOTALL)
+    print(f"cleaned_test: {cleaned_text}")
     return cleaned_text
 
 def get_text_after_colon(input_text):
@@ -81,26 +88,16 @@ def infer(image_input, running_platform):
     )
     print(clipi_result)
 
-    if running_platform == "Local (Qwen2.5-3B-Instruct)":
-        qwen = f"""
-        I'll give you a simple image caption, please provide a 2-4 sentence segment of the most important safety advice that would fit well with the image.
-        Here's the image description: 
-        '{clipi_result}'
-        
-        """
-        gr.Info('Calling Qwen3 ...')
-        result = quen_gen_safety_advice(qwen)
+    capt_prompt = f"""
+    I'll give you a simple image caption, please provide a 2-4 sentence segment of the most important safety advice that would fit well with the image.
+    Here's the image description: 
+    '{clipi_result}'
+    
+    """
+    gr.Info('Calling Qwen3 ...')
+    result = gen_safety_advice(capt_prompt, running_platform)
 
-        print(f"Qwen3 result: {result}")
-
-        result = get_text_after_colon(result)
-    elif running_platform == "Remote (openai/gpt-oss-20b)":
-        gpt = InferenceClient(model=remote_model_path)
-        result = gpt.text_generation(prompt=clipi_result)
-
-        print(f"GPT result: {result}")
-    else:
-        print(f"This should never be reached. Something broke :(")
+    result = get_text_after_colon(result)
 
     # Split the text into paragraphs based on actual line breaks
     paragraphs = result.split('\n')
