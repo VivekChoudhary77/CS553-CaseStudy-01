@@ -47,7 +47,8 @@ def gen_safety_advice(prompt, platform):
         gr.Info('Calling OpenAI/gpt-oss-20b (remote)...')
         try:
             inf_client = InferenceClient(token=hf_token)
-            output_text = inf_client.text_generation(model=remote_model_path, prompt=prompt, max_new_tokens=4096)
+            response = inf_client.text_generation(model=remote_model_path, messages=[{"role": "user", "content": prompt}], max_tokens=4096)
+            output_text = response.choices[0].message.content
         except Exception as e:
             gr.Info(f"Error!!: {e}")
     #print(generate_ids)
