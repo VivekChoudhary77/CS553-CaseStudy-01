@@ -40,13 +40,16 @@ def gen_safety_advice(prompt, platform):
     prompt = instruction.format(prompt)
 
     if platform == "Local (Qwen/Qwen2.5-3B-Instruct)":
-        print("Local model selected!!")
+        gr.Info('Calling Qwen2.5-3B-Instruct (local)...')
         generate_ids = model.generate(tokenizer(prompt, return_tensors='pt').input_ids.cuda(), max_new_tokens=4096)
         output_text = tokenizer.decode(generate_ids[0], skip_special_tokens=True)
     else:
-        print("Remote model selected!!")
-        inf_client = InferenceClient(token=hf_token)
-        output_text = inf_client.text_generation(model=remote_model_path, inputs=prompt, max_new_tokens=4096)
+        gr.Info('Calling OpenAI/gpt-oss-20b (remote)...')
+        try:
+            inf_client = InferenceClient(token=hf_token)
+            output_text = inf_client.text_generation(model=remote_model_path, inputs=prompt, max_new_tokens=4096)
+        except Exception as e:
+            gr.Info(f"Error: {e}")
     #print(generate_ids)
     #print(output_text)
     pattern = r'\[INST\].*?\[/INST\]'
@@ -94,7 +97,6 @@ def infer(image_input, running_platform):
     '{clipi_result}'
     
     """
-    gr.Info('Calling Qwen3 ...')
     result = gen_safety_advice(capt_prompt, running_platform)
 
     result = get_text_after_colon(result)
