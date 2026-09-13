@@ -39,9 +39,17 @@ def gen_safety_advice(prompt, platform):
     prompt = instruction.format(prompt)
 
     if platform == "Local (Qwen/Qwen2.5-3B-Instruct)":
-        output_text = gen_local(prompt)
+        try:
+            output_text = gen_local(prompt)
+        except:
+            gr.Info('Rerouting request to remote model due to error (likely out of free credits)')
+            output_text = gen_remote(prompt)
     else:
-        output_text = gen_remote(prompt)
+        try:
+            output_text = gen_remote(prompt)
+        except:
+            gr.Info('Rerouting request to local model due to error (likely out of free credits)')
+            output_text = gen_local(prompt)
     pattern = r'\[INST\].*?\[/INST\]'
     cleaned_text = re.sub(pattern, '', output_text, flags=re.DOTALL)
     print(f"cleaned_test: {cleaned_text}")
@@ -131,7 +139,7 @@ with gr.Blocks(css=css) as demo:
         with gr.Row():
             with gr.Column():
                 image_in = gr.Image(label="Image Input", type="filepath", elem_id="image-in")
-                running_platform = gr.Radio(label="LLM Model", choices=["Local (Qwen/Qwen2.5-3B-Instruct)", "Remote (OpenAI/gpt-oss-20b)"], value="Children")
+                running_platform = gr.Radio(label="LLM Model", choices=["Local (Qwen/Qwen2.5-3B-Instruct)", "Remote (OpenAI/gpt-oss-20b)"])
                 submit_btn = gr.Button('Give me safety advice')
             with gr.Column():
                 #caption = gr.Textbox(label="Generated Caption")
