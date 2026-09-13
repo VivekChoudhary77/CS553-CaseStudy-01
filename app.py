@@ -20,7 +20,6 @@ remote_model_path = "openai/gpt-oss-20b"
 tokenizer = AutoTokenizer.from_pretrained(model_path, use_fast=False, token=hf_token)
 model = AutoModelForCausalLM.from_pretrained(model_path, token=hf_token).half().cuda()
 
-@spaces.GPU
 def gen_safety_advice(prompt, platform):
     """Generate a 2-4 sentence segment of safety advice using the qwen local model or openai remote inference model based on a prompt.
     
@@ -40,23 +39,25 @@ def gen_safety_advice(prompt, platform):
     prompt = instruction.format(prompt)
 
     if platform == "Local (Qwen/Qwen2.5-3B-Instruct)":
-        gr.Info('Calling Qwen2.5-3B-Instruct (local)...')
-        generate_ids = model.generate(tokenizer(prompt, return_tensors='pt').input_ids.cuda(), max_new_tokens=4096)
-        output_text = tokenizer.decode(generate_ids[0], skip_special_tokens=True)
+        output_text = gen_local(prompt)
     else:
-        gr.Info('Calling OpenAI/gpt-oss-20b (remote)...')
-        try:
-            inf_client = InferenceClient(token=hf_token)
-            response = inf_client.chat_completion(model=remote_model_path, messages=[{"role": "user", "content": prompt}], max_tokens=4096)
-            output_text = response.choices[0].message.content
-        except Exception as e:
-            gr.Info(f"Error!!: {e}")
-    #print(generate_ids)
-    #print(output_text)
+        output_text = gen_remote()
     pattern = r'\[INST\].*?\[/INST\]'
     cleaned_text = re.sub(pattern, '', output_text, flags=re.DOTALL)
     print(f"cleaned_test: {cleaned_text}")
     return cleaned_text
+
+@spaces.GPU
+def gen_local(prompt):
+    gr.Info('Calling Qwen2.5-3B-Instruct (local)...')
+    generate_ids = model.generate(tokenizer(prompt, return_tensors='pt').input_ids.cuda(), max_new_tokens=4096)
+    return tokenizer.decode(generate_ids[0], skip_special_tokens=True)
+
+def gen_remote(prompt):
+    gr.Info('Calling OpenAI/gpt-oss-20b (remote)...')
+    inf_client = InferenceClient(token=hf_token)
+    response = inf_client.chat_completion(model=remote_model_path, messages=[{"role": "user", "content": prompt}], max_tokens=4096)
+    return response.choices[0].message.content
 
 def get_text_after_colon(input_text):
     # Find the first occurrence of ":"
