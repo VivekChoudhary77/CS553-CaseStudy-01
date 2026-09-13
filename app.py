@@ -30,22 +30,10 @@ def gen_safety_advice(prompt, platform):
         A generated 2-4 sentence segment of safety advice string with special formatting and tokens removed.
     """
 
-    instruction = """[INST] <<SYS>>\nYou are a professional safety analyst. Provide the most important safety advice based on the image description provided.
-            In your response, please limit safety advice to 2-4 sentences of the most crucial safety advice to consider. Provide a concise title before the safety advice.
-            Always answer with the top safety advice, while being safe as possible.  Your answers should not include any harmful, unethical, racist, sexist, toxic, dangerous, or illegal content. Please ensure that your responses are socially unbiased and positive in nature.
-            If a question does not make any sense, or is not factually coherent, explain why instead of answering something not correct. If you don't know the answer to a question, please don't share false information.\n<</SYS>>\n\n{} [/INST]"""
-
-    
-    prompt = instruction.format(prompt)
-
     if platform == "Local (Qwen/Qwen2.5-3B-Instruct)":
-        output_text = gen_local(prompt)
+        return gen_local(prompt)
     else:
-        output_text = gen_remote()
-    pattern = r'\[INST\].*?\[/INST\]'
-    cleaned_text = re.sub(pattern, '', output_text, flags=re.DOTALL)
-    print(f"cleaned_test: {cleaned_text}")
-    return cleaned_text
+        return gen_remote(prompt)
 
 @spaces.GPU
 def gen_local(prompt):
@@ -58,19 +46,6 @@ def gen_remote(prompt):
     inf_client = InferenceClient(token=hf_token)
     response = inf_client.chat_completion(model=remote_model_path, messages=[{"role": "user", "content": prompt}], max_tokens=4096)
     return response.choices[0].message.content
-
-def get_text_after_colon(input_text):
-    # Find the first occurrence of ":"
-    colon_index = input_text.find(":")
-    
-    # Check if ":" exists in the input_text
-    if colon_index != -1:
-        # Extract the text after the colon
-        result_text = input_text[colon_index + 1:].strip()
-        return result_text
-    else:
-        # Return the original text if ":" is not found
-        return input_text
 
 def infer(image_input, running_platform):
     """Generate 2-4 sentence of the most important safety advice based on an image using CLIP Interrogator and an LLM.
@@ -93,24 +68,18 @@ def infer(image_input, running_platform):
     )
     print(clipi_result)
 
-    capt_prompt = f"""
-    I'll give you a simple image caption, please provide a 2-4 sentence segment of the most important safety advice that would fit well with the image.
-    Here's the image description: 
-    '{clipi_result}'
+    prompt = f""" You are a professional safety analyst. Provide the most important safety advice based on the image description below.
+            In your response, please limit safety advice to 2-4 sentences of the most crucial safety advice to consider. Provide a concise title before the safety advice.
+            Always answer with the top safety advice, while being safe as possible.  Your answers should not include any harmful, unethical, racist, sexist, toxic, dangerous, or illegal content. Please ensure that your responses are socially unbiased and positive in nature.
+            If a question does not make any sense, or is not factually coherent, explain why instead of answering something not correct. If you don't know the answer to a question, please don't share false information.
+            Here's the image description: '{clipi_result}'
+            """
     
-    """
-    result = gen_safety_advice(capt_prompt, running_platform)
+    if running_platform == "Local (Qwen/Qwen2.5-3B-Instruct)":
+        return gen_local(prompt)
+    else: # Else, run remote
+        return gen_remote(prompt)
 
-    result = get_text_after_colon(result)
-
-    # Split the text into paragraphs based on actual line breaks
-    paragraphs = result.split('\n')
-    
-    # Join the paragraphs back with an extra empty line between each paragraph
-    formatted_text = '\n\n'.join(paragraphs)
-
-
-    return formatted_text
 
 css="""
 #col-container {max-width: 910px; margin-left: auto; margin-right: auto;}
