@@ -1,3 +1,5 @@
+# Used Sonnet 5 with Medium Effort, for creating a small GitHub Actions workflow that installs pytest and runs the test suite on every push and pull request to main.
+# prompt: Create a GitHub Actions workflow file that triggers on push and pull request to the main branch and on workflow_dispatch. It should check out the repository, set up Python 3.10, install pytest, gradio and huggingface_hub with pip, and then run pytest -v. Keep it small and do not add a separate Discord notification step since that already exists in another workflow file.
 name: Test local model product
 
 on:

@@ -1,11 +1,6 @@
-"""Small unit test for app.py's text-cleanup helper.
+# Used Sonnet 5 with Medium Effort, for writing a small pytest test file that tests the get_text_after_colon helper function in app.py without needing a GPU or network access.
+# prompt: Write 1 to 2 pytest tests for the get_text_after_colon function in app.py. The app.py file loads a Qwen model onto a GPU, connects to a remote CLIP Interrogator Hugging Face Space, and launches a Gradio server, all at the top level of the file when it is imported, so importing app.py directly in a test will fail on a normal CI runner. Do not modify app.py. Instead, stub out the transformers and spaces modules, patch gradio_client.Client and gradio.Blocks.launch and gradio.Blocks.queue to no-ops before importing app, then write two small tests, one for a string that has a colon and one for a string that does not have a colon.
 
-app.py loads the local Qwen model onto a GPU, connects to a remote
-CLIP Interrogator Space, and launches the Gradio server unconditionally at
-import time. None of that is possible on a plain CI runner, so before
-importing app we swap those heavy/networked pieces for harmless stand-ins.
-app.py itself is not modified in any way to make this work.
-"""
 import sys
 from pathlib import Path
 from unittest.mock import MagicMock
