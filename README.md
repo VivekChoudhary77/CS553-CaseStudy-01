@@ -14,3 +14,5 @@ short_description: A repository for case study - 01 (MLOps course, CS553)
 ---
 
 An example chatbot using [Gradio](https://gradio.app), [`huggingface_hub`](https://huggingface.co/docs/huggingface_hub/v0.22.2/en/index), and the [Hugging Face Inference API](https://huggingface.co/docs/api-inference/index).
+
+Live Hugging Face Space: https://huggingface.co/spaces/Vickinez077/CS553-MLOps-CaseStudy-01
