@@ -39,17 +39,9 @@ def gen_safety_advice(prompt, platform):
     prompt = instruction.format(prompt)
 
     if platform == "Local (Qwen/Qwen2.5-3B-Instruct)":
-        try:
-            output_text = gen_local(prompt)
-        except:
-            gr.Info('Rerouting request to remote model due to error (likely out of free credits)')
-            output_text = gen_remote(prompt)
+        output_text = gen_local(prompt)
     else:
-        try:
-            output_text = gen_remote(prompt)
-        except:
-            gr.Info('Rerouting request to local model due to error (likely out of free credits)')
-            output_text = gen_local(prompt)
+        output_text = gen_remote(prompt)
     pattern = r'\[INST\].*?\[/INST\]'
     cleaned_text = re.sub(pattern, '', output_text, flags=re.DOTALL)
     print(f"cleaned_test: {cleaned_text}")
