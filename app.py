@@ -92,6 +92,10 @@ def infer(image_input, text_input, running_platform):
         A formatted, 2-4 sentence segment of safety advice based on the provided image.
 
     """
+    if running_platform == "":
+        gr.Info("Please select a running platform for the LLM mode.")
+        return 1
+
     try:
         gr.Info('Calling CLIP Interrogator ...')
 
@@ -106,6 +110,7 @@ def infer(image_input, text_input, running_platform):
         gr.Info(f"No free ZeroGPU usage available. Using text input provided instead.")
         if running_platform == "Local (Qwen/Qwen2.5-3B-Instruct)":
             gr.Info(f"Local model selected (needs ZeroGPU). Automatically retrying with the remote inference model.")
+            running_platform = "Remote (OpenAI/gpt-oss-20b)"
             if text_input != "":
                 clipi_result = text_input
             else:
