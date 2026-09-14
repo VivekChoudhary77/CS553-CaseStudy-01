@@ -103,12 +103,18 @@ def infer(image_input, text_input, running_platform):
         )
         print(clipi_result)
     except Exception as e:
-        gr.Info(f"Error during CLIP Interrogator (likely due to no free ZeroGPU usage available). Using the text input instead.")
-        if text_input != "":
-
-            clipi_result = text_input
+        gr.Info(f"No free ZeroGPU usage available. Using text input provided instead.")
+        if running_platform == "Local (Qwen/Qwen2.5-3B-Instruct)":
+            gr.Info(f"Local model selected (needs ZeroGPU). Automatically retrying with the remote inference model.")
+            if text_input != "":
+                clipi_result = text_input
+            else:
+                gr.Info("No text input provided. Please provide a text description and try again.")
         else:
-            gr.Info("No text input provided. Please provide a text description.")
+            if text_input != "":
+                clipi_result = text_input
+            else:
+                gr.Info("No text input provided. Please provide a text description and try again.")
 
     capt_prompt = f"""
     I'll give you a simple image caption, please provide a 2-4 sentence segment of the most important safety advice that would fit well with the image.
