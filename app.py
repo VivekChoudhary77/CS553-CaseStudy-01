@@ -3,7 +3,8 @@
 import spaces
 import gradio as gr
 import re
-import os 
+import os
+import time
 hf_token = os.environ.get('HF_TOKEN')
 
 from gradio_client import Client, handle_file
@@ -50,14 +51,22 @@ def gen_safety_advice(prompt, platform):
 @spaces.GPU
 def gen_local(prompt):
     gr.Info('Calling Qwen2.5-3B-Instruct (local)...')
+    start_time = time.perf_counter()
     generate_ids = model.generate(tokenizer(prompt, return_tensors='pt').input_ids.cuda(), max_new_tokens=4096)
-    return tokenizer.decode(generate_ids[0], skip_special_tokens=True)
+    text = tokenizer.decode(generate_ids[0], skip_special_tokens=True)
+    elapsed = time.perf_counter() - start_time
+    print(f"[TIMING] platform=local elapsed={elapsed:.2f}s")
+    return f"{text}\n\n_(Response time - {elapsed:.2f}s)_"
 
 def gen_remote(prompt):
     gr.Info('Calling OpenAI/gpt-oss-20b (remote)...')
+    start_time = time.perf_counter()
     inf_client = InferenceClient(token=hf_token)
     response = inf_client.chat_completion(model=remote_model_path, messages=[{"role": "user", "content": prompt}], max_tokens=4096)
-    return response.choices[0].message.content
+    text = response.choices[0].message.content
+    elapsed = time.perf_counter() - start_time
+    print(f"[TIMING] platform=remote elapsed={elapsed:.2f}s")
+    return f"{text}\n\n_(Response time - {elapsed:.2f}s)_"
 
 def get_text_after_colon(input_text):
     # Find the first occurrence of ":"
