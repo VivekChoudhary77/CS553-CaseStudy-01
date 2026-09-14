@@ -81,7 +81,7 @@ def get_text_after_colon(input_text):
         # Return the original text if ":" is not found
         return input_text
 
-def infer(image_input, running_platform):
+def infer(image_input, text_input, running_platform):
     """Generate 2-4 sentence of the most important safety advice based on an image using CLIP Interrogator and an LLM.
     
     Args:
@@ -92,15 +92,23 @@ def infer(image_input, running_platform):
         A formatted, 2-4 sentence segment of safety advice based on the provided image.
 
     """
-    gr.Info('Calling CLIP Interrogator ...')
+    try:
+        gr.Info('Calling CLIP Interrogator ...')
 
-    clipi_result = clipi_client.predict(
-		input_image=handle_file(image_input),
-		interrogation_mode="best",
-		best_mode_max_flavors=4,
-		api_name="/clipi2"
-    )
-    print(clipi_result)
+        clipi_result = clipi_client.predict(
+            input_image=handle_file(image_input),
+            interrogation_mode="best",
+            best_mode_max_flavors=4,
+            api_name="/clipi2"
+        )
+        print(clipi_result)
+    except Exception as e:
+        gr.Info(f"Error during CLIP Interrogator (likely due to no free ZeroGPU usage available). Using the text input instead.")
+        if text_input != "":
+
+            clipi_result = text_input
+        else:
+            gr.Info("No text input provided. Please provide a text description.")
 
     capt_prompt = f"""
     I'll give you a simple image caption, please provide a 2-4 sentence segment of the most important safety advice that would fit well with the image.
@@ -140,12 +148,12 @@ with gr.Blocks(css=css) as demo:
         with gr.Row():
             with gr.Column():
                 image_in = gr.Image(label="Image Input", type="filepath", elem_id="image-in")
+                text_input = gr.Textbox(label="(Optional) Image Description as Text", elem_id="text-input")
                 running_platform = gr.Radio(label="LLM Model", choices=["Local (Qwen/Qwen2.5-3B-Instruct)", "Remote (OpenAI/gpt-oss-20b)"])
                 submit_btn = gr.Button('Give me safety advice')
             with gr.Column():
-                #caption = gr.Textbox(label="Generated Caption")
                 safety_advice = gr.Textbox(label="Generated Safety Advice", elem_id="safety_advice")
         
-    submit_btn.click(fn=infer, inputs=[image_in, running_platform], outputs=[safety_advice])
+    submit_btn.click(fn=infer, inputs=[image_in, text_input, running_platform], outputs=[safety_advice])
 
 demo.queue(max_size=12).launch(ssr_mode=False, mcp_server=True)
