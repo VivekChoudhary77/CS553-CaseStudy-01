@@ -93,8 +93,7 @@ def infer(image_input, text_input, running_platform):
 
     """
     if running_platform == "":
-        gr.Info("Please select a running platform for the LLM mode.")
-        return 1
+        gr.Info("No model selected, using remote inference model by default.")
 
     try:
         gr.Info('Calling CLIP Interrogator ...')
