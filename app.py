@@ -106,7 +106,7 @@ def infer(image_input, text_input, running_platform):
         )
         print(clipi_result)
     except Exception as e:
-        gr.Info(f"No free ZeroGPU usage available. Using text input provided instead.")
+        gr.Info(f"No free ZeroGPU usage available (needed to generate a caption from the provided image). Using text input provided instead.")
         if running_platform == "Local (Qwen/Qwen2.5-3B-Instruct)":
             gr.Info(f"Local model selected (needs ZeroGPU). Automatically retrying with the remote inference model.")
             running_platform = "Remote (OpenAI/gpt-oss-20b)"
