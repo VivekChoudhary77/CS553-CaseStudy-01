@@ -1,4 +1,4 @@
-# Original product reference: https://huggingface.co/spaces/fffiloni/Image-to-Story/blob/main/app.py
+# Original product reference: https://huggingface.co/spaces/fffiloni/Image-to-Story
 
 import spaces
 import gradio as gr
