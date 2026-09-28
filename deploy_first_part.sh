@@ -12,7 +12,7 @@ rm -rf tmp
 mkdir tmp
 
 # copy the key to the temporary directory
-cp ${STUDENT_ADMIN_KEY_PATH}/student-admin_key* tmp
+cp ${STUDENT_ADMIN_KEY_PATH}/student-admin_key tmp
 
 # Change the premissions of the directory
 chmod 700 tmp
@@ -21,10 +21,10 @@ chmod 700 tmp
 cd tmp
 
 # Set the permissions of the key
-chmod 600 student-admin_key*
+chmod 600 student-admin_key
 
 # Create a unique key
-rm -f mykey*
+rm -f mykey
 ssh-keygen -f mykey -t ed25519 -N "careful"
 
 # Insert the key into the authorized_keys file on the server
