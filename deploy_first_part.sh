@@ -2,10 +2,10 @@
 
 PORT=22003
 MACHINE=paffenroth-23.dyn.wpi.edu
-STUDENT_ADMIN_KEY_PATH=$HOME/projects/1_classes/DS553_private/scripts/CS2
+STUDENT_ADMIN_KEY_PATH=$HOME/home/nacote1/CS553/Case-Study-2
 
 # Clean up from previous runs
-ssh-keygen -f "/home/rcpaffenroth/.ssh/known_hosts" -R "[paffenroth-23.dyn.wpi.edu]:21003"
+ssh-keygen -f "/home/nacote1/.ssh/known_hosts" -R "[paffenroth-23.dyn.wpi.edu]:22003"
 rm -rf tmp
 
 # Create a temporary directory
@@ -51,10 +51,10 @@ ssh-add mykey
 echo "checking that the authorized_keys file is correct"
 ssh -p ${PORT} -o StrictHostKeyChecking=no student-admin@${MACHINE} "cat ~/.ssh/authorized_keys"
 
-# clone the repo
-git clone --branch case_study_2 --single-branch https://github.com/rcpaffenroth/DSCS553_WPI_Fall_2026.git DSCS553_example
+# clone the Case_Study_2 branch on the repo
+git clone --branch Case_Study_2 --single-branch https://github.com/VivekChoudhary77/CS553-CaseStudy-01/ Case-Study-2
 # Copy the files to the server
-scp -P ${PORT} -o StrictHostKeyChecking=no -r DSCS553_example student-admin@${MACHINE}:~/
+scp -P ${PORT} -o StrictHostKeyChecking=no -r Case-Study-2 student-admin@${MACHINE}:~/
 
 # check that the code in installed and start up the product
 # COMMAND="ssh -p ${PORT} -o StrictHostKeyChecking=no student-admin@${MACHINE}"
