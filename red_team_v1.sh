@@ -19,11 +19,14 @@ for i in $(seq 1 $num_files); do
   if ssh -i $KEY -p $((${i} + ${PORT})) -o StrictHostKeyChecking=no student-admin@${MACHINE} hostname; then
     echo "group ${i} is vulnerable!"
     
-    #log onto vulnerable machine
+    #send message to discord
+    #code was edited by ChatGPT, added a \ after Post, promt was "will this work?"
     curl -H "Content-Type: application/json" \
     -X POST \
     -d '{"content":"successfully accessed another teams machine"}' \
-    "$WEBHOOK_URL"
+    ${WEBHOOK_URL}
+    
+    #log onto vulnerable machine
     ssh -i ${KEY} -p $((${i} + ${PORT})) student-admin@${MACHINE}
     exit 0
     
