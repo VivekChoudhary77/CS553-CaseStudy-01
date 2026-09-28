@@ -2,7 +2,7 @@
 
 PORT=22003
 MACHINE=paffenroth-23.dyn.wpi.edu
-STUDENT_ADMIN_KEY_PATH=$HOME/home/nacote1/CS553/Case-Study-2
+STUDENT_ADMIN_KEY_PATH=$HOME/home/nacote1/CS553/CS553-CaseStudy-01
 
 # Clean up from previous runs
 ssh-keygen -f "/home/nacote1/.ssh/known_hosts" -R "[paffenroth-23.dyn.wpi.edu]:22003"
