@@ -1,6 +1,6 @@
 #! /bin/bash
 
-PORT=21003
+PORT=22003
 MACHINE=paffenroth-23.dyn.wpi.edu
 STUDENT_ADMIN_KEY_PATH=$HOME/projects/1_classes/DS553_private/scripts/CS2
 
