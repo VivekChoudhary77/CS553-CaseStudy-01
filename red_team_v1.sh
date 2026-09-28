@@ -9,7 +9,7 @@ MACHINE=paffenroth-23.dyn.wpi.edu
 #TODO Update file name
 KEY=$HOME/projects/1_classes/DS553_private/scripts/CS2/student-admin_key
 chmod 600 ${KEY}
-WEBHOOK_URL="https://discord.com/api/webhooks/1554213924189241355/UuwDKLmhgHRqFYZRiEvkzXHPrhFgoteVpK4e2LKfVYiFN32JWU8FkpEBus5qw69W18LY"
+WEBHOOK_URL="https://discord.com/api/webhooks/1554256448081502314/muodhTKDVj4Lp8Rv4pSy36bwV0OItbReH9fdiO8303oVbIqBtIO8fBbIicmAH9niZZJ0"
 
 # Loop to create files
 for i in $(seq 1 $num_files); do
